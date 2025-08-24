@@ -201,7 +201,7 @@ function About() {
   return (
     <div className="relative z-10 min-h-screen px-6 py-28">
       <div className="mx-auto max-w-6xl space-y-8">
-        <h3 className="text-3xl font-bold text-white">About</h3>
+        <GradientText className="text-3xl md:text-4xl font-extrabold tracking-tight">About</GradientText>
         <div className="rounded-2xl overflow-hidden border border-white/10 bg-white/5">
           <div className="relative rounded-xl p-[2px] bg-gradient-to-r from-green-400/30 via-pink-400/30 to-blue-500/30">
             <div className="w-full h-64 md:h-72 flex items-center justify-center rounded-[0.65rem] bg-black/30">
@@ -210,8 +210,9 @@ function About() {
             <span className="pointer-events-none absolute -inset-2 rounded-2xl blur-2xl opacity-40 bg-gradient-to-r from-green-400/20 via-pink-400/20 to-blue-500/20" />
           </div>
           <div className="p-6">
-            <p className="text-white/80 leading-relaxed">
-              I am a highly skilled and experienced software engineer specialized in full-stack web development. I build modern, responsive, and performant applications, focusing on clean architecture, scalability, and user-centric design. I excel at transforming ideas into real products with high quality standards, delivering maintainable code and robust solutions for complex business needs.
+            <h4 className="text-xl font-bold mb-2 bg-gradient-to-r from-green-400 via-blue-500 to-pink-500 bg-clip-text text-transparent">Expert Full-Stack Developer</h4>
+            <p className="text-white/90 leading-relaxed text-base md:text-lg">
+              I deliver modern, responsive, and high-performance web applications with a strong focus on clean architecture and scalability. I transform ideas into real products with premium quality, writing maintainable code and building robust solutions for complex business needs.
             </p>
           </div>
         </div>
@@ -223,7 +224,8 @@ function About() {
             <span className="pointer-events-none absolute -inset-2 rounded-2xl blur-2xl opacity-40 bg-gradient-to-r from-blue-400/20 via-pink-400/20 to-green-500/20" />
           </div>
           <div className="p-6">
-            <p className="text-white/80 leading-relaxed">Graduated from Nile University.</p>
+            <h4 className="text-xl font-bold mb-2 bg-gradient-to-r from-blue-400 via-pink-500 to-green-500 bg-clip-text text-transparent">Education</h4>
+            <p className="text-white/90 leading-relaxed text-base md:text-lg">Graduated from Nile University.</p>
           </div>
         </div>
       </div>
@@ -269,6 +271,7 @@ function App() {
         <Route path="/certificates" element={<Certificates />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/talk" element={<Contact />} />
         <Route path="/login" element={<Login />} />
         <Route path="*" element={<Home />} />
       </Routes>

@@ -15,6 +15,7 @@ const baseItems: NavItem[] = [
   { label: 'CERTIFICATES', to: '/certificates' },
   { label: 'ABOUT', to: '/about' },
   { label: 'CONTACT', to: '/contact' },
+  { label: 'TALK', to: '/talk' },
   { label: 'LOGIN', to: '/login' },
 ];
 
