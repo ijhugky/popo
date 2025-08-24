@@ -6,7 +6,7 @@ interface AdminPasswordModalProps {
   onSuccess: () => void;
 }
 
-const ADMIN_PASSWORD = '6532';
+const ADMIN_PASSWORDS = ['6532', '#CROCTEFO#'];
 
 const AdminPasswordModal: React.FC<AdminPasswordModalProps> = ({ isOpen, onClose, onSuccess }) => {
   const [password, setPassword] = useState('');
@@ -25,7 +25,7 @@ const AdminPasswordModal: React.FC<AdminPasswordModalProps> = ({ isOpen, onClose
 
   const handleSubmit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (password === ADMIN_PASSWORD) {
+    if (ADMIN_PASSWORDS.includes(password)) {
       localStorage.setItem('isAdmin', '1');
       window.dispatchEvent(new CustomEvent('admin:changed', { detail: { isAdmin: true } }));
       onSuccess();
