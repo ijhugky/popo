@@ -436,11 +436,62 @@ function About() {
 }
 
 function Contact() {
+  const [form, setForm] = React.useState({ first: '', middle: '', last: '', phone: '', desc: '' });
+  const [sent, setSent] = React.useState(false);
+  const onChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setForm((f) => ({ ...f, [name]: value }));
+  };
+  const onSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Placeholder submit: يمكنك ربطه بخدمة بريد لاحقًا
+    console.log('Contact form:', form);
+    setSent(true);
+    setTimeout(() => setSent(false), 3000);
+    setForm({ first: '', middle: '', last: '', phone: '', desc: '' });
+  };
   return (
     <div className="relative z-10 min-h-screen px-6 py-28">
-      <div className="mx-auto max-w-6xl">
-        <h3 className="text-3xl font-bold text-white mb-4">Contact</h3>
-        <p className="text-white/70">Contact details coming soon.</p>
+      <div className="mx-auto max-w-4xl">
+        <GradientText className="text-3xl md:text-4xl font-extrabold tracking-tight mb-6">Let's Talk</GradientText>
+        <div className="relative rounded-2xl p-[2px] bg-gradient-to-r from-green-400/30 via-blue-500/30 to-pink-500/30">
+          <div className="rounded-2xl bg-black/40 backdrop-blur-md border border-white/10 p-6 md:p-8">
+            <form onSubmit={onSubmit} className="grid gap-4">
+              <div className="grid md:grid-cols-3 gap-3">
+                <div className="group">
+                  <label className="block text-xs text-white/70 mb-1">First name</label>
+                  <input name="first" value={form.first} onChange={onChange} required placeholder="Mohamed" className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white outline-none focus:ring-2 focus:ring-green-500/60" />
+                </div>
+                <div className="group">
+                  <label className="block text-xs text-white/70 mb-1">Middle name</label>
+                  <input name="middle" value={form.middle} onChange={onChange} placeholder="A." className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white outline-none focus:ring-2 focus:ring-blue-500/60" />
+                </div>
+                <div className="group">
+                  <label className="block text-xs text-white/70 mb-1">Last name</label>
+                  <input name="last" value={form.last} onChange={onChange} required placeholder="Abdelsattar" className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white outline-none focus:ring-2 focus:ring-pink-500/60" />
+                </div>
+              </div>
+
+              <div className="group">
+                <label className="block text-xs text-white/70 mb-1">Phone</label>
+                <input name="phone" type="tel" value={form.phone} onChange={onChange} required placeholder="+20 1XX XXX XXXX" className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white outline-none focus:ring-2 focus:ring-blue-500/60" />
+              </div>
+
+              <div className="group">
+                <label className="block text-xs text-white/70 mb-1">Description</label>
+                <textarea name="desc" value={form.desc} onChange={onChange} required placeholder="Describe what you need..." rows={5} className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white outline-none focus:ring-2 focus:ring-green-500/60" />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span className={`text-sm ${sent ? 'text-green-400' : 'text-white/60'}`}>{sent ? 'Message sent! I will contact you soon.' : 'I usually respond within 24 hours.'}</span>
+                <button type="submit" className="relative px-6 py-3 rounded-full font-semibold text-white border border-white/10 bg-gradient-to-r from-green-500/30 to-blue-500/30 hover:from-green-500/40 hover:to-blue-500/40">
+                  <span className="absolute -inset-1 rounded-full blur-2xl opacity-30 bg-gradient-to-r from-green-400/50 via-blue-500/50 to-pink-500/50" aria-hidden="true" />
+                  <span className="relative">Send Message</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       </div>
     </div>
   );
