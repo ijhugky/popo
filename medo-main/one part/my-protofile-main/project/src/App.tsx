@@ -111,11 +111,26 @@ const WorksAdminEditor: React.FC<WorksAdminEditorProps> = ({ onAdd }) => {
   const [title, setTitle] = React.useState('');
   const [description, setDescription] = React.useState('');
   const [link, setLink] = React.useState('');
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => setImageSrc(String(reader.result || ''));
+    reader.readAsDataURL(file);
+  };
   return (
     <div className="mt-8 p-4 rounded-2xl border border-white/10 bg-white/5">
       <h4 className="text-white font-semibold mb-3">Add Work (Admin)</h4>
       <div className="grid md:grid-cols-2 gap-3">
-        <input value={imageSrc} onChange={(e) => setImageSrc(e.target.value)} placeholder="/1.jpg or https://..." className="px-3 py-2 rounded-lg bg-white/10 text-white outline-none" />
+        <div className="flex flex-col gap-2">
+          <input value={imageSrc} onChange={(e) => setImageSrc(e.target.value)} placeholder="/1.jpg or https://..." className="px-3 py-2 rounded-lg bg-white/10 text-white outline-none" />
+          <input type="file" accept="image/*" onChange={handleFileChange} className="px-3 py-2 rounded-lg bg-white/10 text-white outline-none" />
+          {imageSrc && (
+            <div className="rounded-lg border border-white/10 bg-black/20 p-2">
+              <img src={imageSrc} alt="preview" className="max-h-32 object-contain mx-auto" />
+            </div>
+          )}
+        </div>
         <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Title" className="px-3 py-2 rounded-lg bg-white/10 text-white outline-none" />
         <input value={link} onChange={(e) => setLink(e.target.value)} placeholder="Project URL" className="px-3 py-2 rounded-lg bg-white/10 text-white outline-none" />
         <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Description" className="px-3 py-2 rounded-lg bg-white/10 text-white outline-none md:col-span-2" />
@@ -179,11 +194,26 @@ const CertificatesAdminEditor: React.FC<CertificatesAdminEditorProps> = ({ onAdd
   const [imageSrc, setImageSrc] = React.useState('');
   const [title, setTitle] = React.useState('');
   const [description, setDescription] = React.useState('');
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => setImageSrc(String(reader.result || ''));
+    reader.readAsDataURL(file);
+  };
   return (
     <div className="mt-8 p-4 rounded-2xl border border-white/10 bg-white/5">
       <h4 className="text-white font-semibold mb-3">Add Certificate (Admin)</h4>
       <div className="grid md:grid-cols-2 gap-3">
-        <input value={imageSrc} onChange={(e) => setImageSrc(e.target.value)} placeholder="/6.jpg or https://..." className="px-3 py-2 rounded-lg bg-white/10 text-white outline-none" />
+        <div className="flex flex-col gap-2">
+          <input value={imageSrc} onChange={(e) => setImageSrc(e.target.value)} placeholder="/6.jpg or https://..." className="px-3 py-2 rounded-lg bg-white/10 text-white outline-none" />
+          <input type="file" accept="image/*" onChange={handleFileChange} className="px-3 py-2 rounded-lg bg-white/10 text-white outline-none" />
+          {imageSrc && (
+            <div className="rounded-lg border border-white/10 bg-black/20 p-2">
+              <img src={imageSrc} alt="preview" className="max-h-32 object-contain mx-auto" />
+            </div>
+          )}
+        </div>
         <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Title" className="px-3 py-2 rounded-lg bg-white/10 text-white outline-none" />
         <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Description" className="px-3 py-2 rounded-lg bg-white/10 text-white outline-none md:col-span-2" />
       </div>
