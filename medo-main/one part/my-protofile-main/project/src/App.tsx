@@ -1,6 +1,6 @@
 import React from 'react';
 import { useState } from 'react';
-import { Routes, Route, NavLink } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import { Mail, MessageCircle } from 'lucide-react';
 import AnimatedBackground from './components/AnimatedBackground';
 import GradientText from './components/GradientText';
@@ -62,6 +62,8 @@ function Works() {
   const [items, setItems] = React.useState<Array<{ id: string; imageSrc: string; title: string; description: string; link?: string }>>([]);
   const [showAdminModal, setShowAdminModal] = React.useState(false);
   const [ghToken, setGhToken] = React.useState<string>(localStorage.getItem('gh_token') || '');
+  const [editingId, setEditingId] = React.useState<string | null>(null);
+  const [editingDraft, setEditingDraft] = React.useState<{ imageSrc: string; title: string; description: string; link?: string } | null>(null);
 
   React.useEffect(() => {
     // Load published content for everyone
@@ -82,7 +84,7 @@ function Works() {
 
   const handleLongPress = React.useCallback(() => setShowAdminModal(true), []);
 
-  const publishWorksToGitHub = async () => {
+  const publishWorksToGitHub = async (arr?: Array<{ id: string; imageSrc: string; title: string; description: string; link?: string }>) => {
     if (!ghToken) {
       alert('Please set a GitHub token first.');
       return;
@@ -99,7 +101,7 @@ function Works() {
         const decoded = atob(getJson.content);
         existing = JSON.parse(decoded);
       }
-      const updated = { ...existing, works: items };
+      const updated = { ...existing, works: arr || items };
       const contentB64 = btoa(JSON.stringify(updated, null, 2));
       const putRes = await fetch(apiBase, {
         method: 'PUT',
@@ -132,19 +134,55 @@ function Works() {
             <p className="text-white/70">No works yet.</p>
           )}
           {items.map((w) => (
-            <WorkCard key={w.id} imageSrc={w.imageSrc} title={w.title} description={w.description} link={w.link} showViewButton />
+            <div key={w.id} className="space-y-2">
+              <WorkCard imageSrc={w.imageSrc} title={w.title} description={w.description} link={w.link} showViewButton />
+              {isAdmin && (
+                <div className="flex gap-2">
+                  <button onClick={() => { setEditingId(w.id); setEditingDraft({ imageSrc: w.imageSrc, title: w.title, description: w.description, link: w.link }); }} className="px-3 py-1 rounded-full border border-white/10 text-white bg-white/10 hover:bg-white/15">Edit</button>
+                  <button onClick={() => {
+                    if (!confirm('Delete this item?')) return;
+                    const next = items.filter((it) => it.id !== w.id);
+                    setItems(next);
+                    publishWorksToGitHub(next);
+                  }} className="px-3 py-1 rounded-full border border-white/10 text-white bg-red-500/20 hover:bg-red-500/30">Delete</button>
+                </div>
+              )}
+              {isAdmin && editingId === w.id && editingDraft && (
+                <div className="p-3 rounded-xl border border-white/10 bg-white/5 grid md:grid-cols-2 gap-2">
+                  <input value={editingDraft.imageSrc} onChange={(e) => setEditingDraft({ ...editingDraft, imageSrc: e.target.value })} placeholder="Image URL or Data URL" className="px-3 py-2 rounded-lg bg-white/10 text-white outline-none" />
+                  <input value={editingDraft.title} onChange={(e) => setEditingDraft({ ...editingDraft, title: e.target.value })} placeholder="Title" className="px-3 py-2 rounded-lg bg-white/10 text-white outline-none" />
+                  <input value={editingDraft.link || ''} onChange={(e) => setEditingDraft({ ...editingDraft, link: e.target.value })} placeholder="Project URL" className="px-3 py-2 rounded-lg bg-white/10 text-white outline-none" />
+                  <textarea value={editingDraft.description} onChange={(e) => setEditingDraft({ ...editingDraft, description: e.target.value })} placeholder="Description" className="px-3 py-2 rounded-lg bg-white/10 text-white outline-none md:col-span-2" />
+                  <div className="md:col-span-2 flex gap-2">
+                    <button onClick={() => { setEditingId(null); setEditingDraft(null); }} className="px-3 py-1 rounded-full border border-white/10 text-white bg-white/10">Cancel</button>
+                    <button onClick={() => {
+                      if (!editingDraft) return;
+                      const next = items.map((it) => it.id === w.id ? { ...it, ...editingDraft } : it);
+                      setItems(next);
+                      setEditingId(null); setEditingDraft(null);
+                      publishWorksToGitHub(next);
+                    }} className="px-3 py-1 rounded-full border border-white/10 text-white bg-green-500/30">Save</button>
+                  </div>
+                </div>
+              )}
+            </div>
           ))}
         </div>
 
         {isAdmin && (
           <>
-            <WorksAdminEditor onAdd={(payload) => setItems((arr) => [{ id: crypto.randomUUID(), ...payload }, ...arr])} />
+            <WorksAdminEditor onAdd={(payload) => {
+              const newItem = { id: crypto.randomUUID(), ...payload };
+              const next = [newItem, ...items];
+              setItems(next);
+              publishWorksToGitHub(next);
+            }} />
             <div className="mt-4 p-4 rounded-2xl border border-white/10 bg-white/5 flex flex-col md:flex-row gap-3 items-start md:items-end">
               <div className="flex-1 w-full">
                 <label className="block text-white/80 text-sm mb-1">GitHub Token (repo scope)</label>
                 <input type="password" value={ghToken} onChange={(e) => { setGhToken(e.target.value); localStorage.setItem('gh_token', e.target.value); }} className="w-full px-3 py-2 rounded-lg bg-white/10 text-white outline-none" placeholder="ghp_..." />
               </div>
-              <button onClick={publishWorksToGitHub} className="px-4 py-2 rounded-full border border-white/10 text-white bg-gradient-to-r from-green-500/30 to-blue-500/30">Publish Works</button>
+              <button onClick={() => publishWorksToGitHub()} className="px-4 py-2 rounded-full border border-white/10 text-white bg-gradient-to-r from-green-500/30 to-blue-500/30">Publish Works</button>
             </div>
           </>
         )}
@@ -196,11 +234,14 @@ const WorksAdminEditor: React.FC<WorksAdminEditorProps> = ({ onAdd }) => {
     </div>
   );
 };
+
 function Certificates() {
   const isAdmin = useIsAdmin();
   const [items, setItems] = React.useState<Array<{ id: string; imageSrc: string; title: string; description: string }>>([]);
   const [showAdminModal, setShowAdminModal] = React.useState(false);
   const [ghToken, setGhToken] = React.useState<string>(localStorage.getItem('gh_token') || '');
+  const [editingId, setEditingId] = React.useState<string | null>(null);
+  const [editingDraft, setEditingDraft] = React.useState<{ imageSrc: string; title: string; description: string } | null>(null);
 
   React.useEffect(() => {
     fetch('/content.json', { cache: 'no-store' })
@@ -220,7 +261,7 @@ function Certificates() {
 
   const handleLongPress = React.useCallback(() => setShowAdminModal(true), []);
 
-  const publishCertificatesToGitHub = async () => {
+  const publishCertificatesToGitHub = async (arr?: Array<{ id: string; imageSrc: string; title: string; description: string }>) => {
     if (!ghToken) { alert('Please set a GitHub token first.'); return; }
     try {
       const owner = 'ijhugky';
@@ -234,7 +275,7 @@ function Certificates() {
         const decoded = atob(getJson.content);
         existing = JSON.parse(decoded);
       }
-      const updated = { ...existing, certificates: items };
+      const updated = { ...existing, certificates: arr || items };
       const contentB64 = btoa(JSON.stringify(updated, null, 2));
       const putRes = await fetch(apiBase, {
         method: 'PUT',
@@ -260,19 +301,54 @@ function Certificates() {
             <p className="text-white/70">No certificates yet.</p>
           )}
           {items.map((c) => (
-            <CertificateCard key={c.id} imageSrc={c.imageSrc} title={c.title} description={c.description} />
+            <div key={c.id} className="space-y-2">
+              <CertificateCard imageSrc={c.imageSrc} title={c.title} description={c.description} />
+              {isAdmin && (
+                <div className="flex gap-2">
+                  <button onClick={() => { setEditingId(c.id); setEditingDraft({ imageSrc: c.imageSrc, title: c.title, description: c.description }); }} className="px-3 py-1 rounded-full border border-white/10 text-white bg-white/10 hover:bg-white/15">Edit</button>
+                  <button onClick={() => {
+                    if (!confirm('Delete this item?')) return;
+                    const next = items.filter((it) => it.id !== c.id);
+                    setItems(next);
+                    publishCertificatesToGitHub(next);
+                  }} className="px-3 py-1 rounded-full border border-white/10 text-white bg-red-500/20 hover:bg-red-500/30">Delete</button>
+                </div>
+              )}
+              {isAdmin && editingId === c.id && editingDraft && (
+                <div className="p-3 rounded-xl border border-white/10 bg-white/5 grid md:grid-cols-2 gap-2">
+                  <input value={editingDraft.imageSrc} onChange={(e) => setEditingDraft({ ...editingDraft, imageSrc: e.target.value })} placeholder="Image URL or Data URL" className="px-3 py-2 rounded-lg bg-white/10 text-white outline-none" />
+                  <input value={editingDraft.title} onChange={(e) => setEditingDraft({ ...editingDraft, title: e.target.value })} placeholder="Title" className="px-3 py-2 rounded-lg bg-white/10 text-white outline-none" />
+                  <textarea value={editingDraft.description} onChange={(e) => setEditingDraft({ ...editingDraft, description: e.target.value })} placeholder="Description" className="px-3 py-2 rounded-lg bg-white/10 text-white outline-none md:col-span-2" />
+                  <div className="md:col-span-2 flex gap-2">
+                    <button onClick={() => { setEditingId(null); setEditingDraft(null); }} className="px-3 py-1 rounded-full border border-white/10 text-white bg-white/10">Cancel</button>
+                    <button onClick={() => {
+                      if (!editingDraft) return;
+                      const next = items.map((it) => it.id === c.id ? { ...it, ...editingDraft } : it);
+                      setItems(next);
+                      setEditingId(null); setEditingDraft(null);
+                      publishCertificatesToGitHub(next);
+                    }} className="px-3 py-1 rounded-full border border-white/10 text-white bg-green-500/30">Save</button>
+                  </div>
+                </div>
+              )}
+            </div>
           ))}
         </div>
 
         {isAdmin && (
           <>
-            <CertificatesAdminEditor onAdd={(payload) => setItems((arr) => [{ id: crypto.randomUUID(), ...payload }, ...arr])} />
+            <CertificatesAdminEditor onAdd={(payload) => {
+              const newItem = { id: crypto.randomUUID(), ...payload };
+              const next = [newItem, ...items];
+              setItems(next);
+              publishCertificatesToGitHub(next);
+            }} />
             <div className="mt-4 p-4 rounded-2xl border border-white/10 bg-white/5 flex flex-col md:flex-row gap-3 items-start md:items-end">
               <div className="flex-1 w-full">
                 <label className="block text-white/80 text-sm mb-1">GitHub Token (repo scope)</label>
                 <input type="password" value={ghToken} onChange={(e) => { setGhToken(e.target.value); localStorage.setItem('gh_token', e.target.value); }} className="w-full px-3 py-2 rounded-lg bg-white/10 text-white outline-none" placeholder="ghp_..." />
               </div>
-              <button onClick={publishCertificatesToGitHub} className="px-4 py-2 rounded-full border border-white/10 text-white bg-gradient-to-r from-green-500/30 to-blue-500/30">Publish Certificates</button>
+              <button onClick={() => publishCertificatesToGitHub()} className="px-4 py-2 rounded-full border border-white/10 text-white bg-gradient-to-r from-green-500/30 to-blue-500/30">Publish Certificates</button>
             </div>
           </>
         )}
@@ -322,6 +398,7 @@ const CertificatesAdminEditor: React.FC<CertificatesAdminEditorProps> = ({ onAdd
     </div>
   );
 };
+
 function About() {
   return (
     <div className="relative z-10 min-h-screen px-6 py-28">
@@ -357,6 +434,7 @@ function About() {
     </div>
   );
 }
+
 function Contact() {
   return (
     <div className="relative z-10 min-h-screen px-6 py-28">
