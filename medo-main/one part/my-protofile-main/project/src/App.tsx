@@ -15,6 +15,10 @@ import CertificateCard from './components/CertificateCard';
 import useIsAdmin from './hooks/useIsAdmin';
 import AdminPasswordModal from './components/AdminPasswordModal';
 
+// مؤقتًا للتأكد من قراءة متغيرات البيئة
+console.log('VITE_SUPABASE_URL:', import.meta.env.VITE_SUPABASE_URL);
+console.log('VITE_SUPABASE_ANON_KEY:', import.meta.env.VITE_SUPABASE_ANON_KEY ? 'present' : 'missing');
+
 function Home() {
   const handleContactEmail = () => {
     window.location.href = 'mailto:eleanoretefo1@gmail.com';
