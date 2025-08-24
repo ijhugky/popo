@@ -514,6 +514,17 @@ function Login() {
   );
 }
 
+function Rating() {
+  return (
+    <div className="relative z-10 min-h-screen px-6 py-28">
+      <div className="mx-auto max-w-6xl">
+        <GradientText className="text-3xl md:text-4xl font-extrabold tracking-tight mb-4">Rating</GradientText>
+        <p className="text-white/70">Coming soon.</p>
+      </div>
+    </div>
+  );
+}
+
 function App() {
   const [isLoading, setIsLoading] = useState(true);
   const handleLoadingComplete = () => setIsLoading(false);
@@ -533,6 +544,7 @@ function App() {
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/talk" element={<Contact />} />
+        <Route path="/rating" element={<Rating />} />
         <Route path="/login" element={<Login />} />
         <Route path="*" element={<Home />} />
       </Routes>
