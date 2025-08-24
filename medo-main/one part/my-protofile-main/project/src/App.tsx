@@ -9,6 +9,10 @@ import ProfileImage from './components/ProfileImage';
 import TypingText from './components/TypingText';
 import LoadingScreen from './components/LoadingScreen';
 import Navbar from './components/Navbar';
+import WorkCard from './components/WorkCard';
+import CertificateCard from './components/CertificateCard';
+import useIsAdmin from './hooks/useIsAdmin';
+import AdminPasswordModal from './components/AdminPasswordModal';
 
 function Home() {
   const handleContactEmail = () => {
@@ -53,31 +57,158 @@ function Home() {
 }
 
 function Works() {
+  const isAdmin = useIsAdmin();
+  const [items, setItems] = React.useState<Array<{ id: string; imageSrc: string; title: string; description: string; link?: string }>>(() => {
+    const saved = localStorage.getItem('works');
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [showAdminModal, setShowAdminModal] = React.useState(false);
+
+  React.useEffect(() => {
+    localStorage.setItem('works', JSON.stringify(items));
+  }, [items]);
+
+  const handleLongPress = React.useCallback(() => setShowAdminModal(true), []);
+
   return (
     <div className="relative z-10 min-h-screen px-6 py-28">
-      <div className="mx-auto max-w-6xl">
-        <h3 className="text-3xl font-bold text-white mb-4">Our Works</h3>
-        <p className="text-white/70">Showcase coming soon.</p>
+      <div className="mx-auto max-w-6xl" onPointerDown={(e) => {
+        if (e.pointerType !== 'mouse') return;
+        const target = e.currentTarget as HTMLElement;
+        (target as any)._pressTimer = setTimeout(handleLongPress, 800);
+      }} onPointerUp={(e) => {
+        const target = e.currentTarget as any;
+        if (target._pressTimer) clearTimeout(target._pressTimer);
+      }}>
+        <h3 className="text-3xl font-bold text-white mb-6">Our Works</h3>
+        <div className="grid gap-6">
+          {items.length === 0 && (
+            <p className="text-white/70">No works yet. {isAdmin ? 'Long-press anywhere to unlock admin and add items.' : ''}</p>
+          )}
+          {items.map((w) => (
+            <WorkCard key={w.id} imageSrc={w.imageSrc} title={w.title} description={w.description} link={w.link} showViewButton />
+          ))}
+        </div>
+
+        {isAdmin && (
+          <WorksAdminEditor onAdd={(payload) => setItems((arr) => [{ id: crypto.randomUUID(), ...payload }, ...arr])} />
+        )}
       </div>
+      <AdminPasswordModal isOpen={showAdminModal} onClose={() => setShowAdminModal(false)} onSuccess={() => {}} />
     </div>
   );
 }
-function Skills() {
+
+interface WorksAdminEditorProps {
+  onAdd: (payload: { imageSrc: string; title: string; description: string; link: string }) => void;
+}
+const WorksAdminEditor: React.FC<WorksAdminEditorProps> = ({ onAdd }) => {
+  const [imageSrc, setImageSrc] = React.useState('');
+  const [title, setTitle] = React.useState('');
+  const [description, setDescription] = React.useState('');
+  const [link, setLink] = React.useState('');
   return (
-    <div className="relative z-10 min-h-screen px-6 py-28">
-      <div className="mx-auto max-w-6xl">
-        <h3 className="text-3xl font-bold text-white mb-4">Skills</h3>
-        <p className="text-white/70">Skills content coming soon.</p>
+    <div className="mt-8 p-4 rounded-2xl border border-white/10 bg-white/5">
+      <h4 className="text-white font-semibold mb-3">Add Work (Admin)</h4>
+      <div className="grid md:grid-cols-2 gap-3">
+        <input value={imageSrc} onChange={(e) => setImageSrc(e.target.value)} placeholder="/1.jpg or https://..." className="px-3 py-2 rounded-lg bg-white/10 text-white outline-none" />
+        <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Title" className="px-3 py-2 rounded-lg bg-white/10 text-white outline-none" />
+        <input value={link} onChange={(e) => setLink(e.target.value)} placeholder="Project URL" className="px-3 py-2 rounded-lg bg-white/10 text-white outline-none" />
+        <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Description" className="px-3 py-2 rounded-lg bg-white/10 text-white outline-none md:col-span-2" />
+      </div>
+      <div className="mt-3">
+        <button onClick={() => {
+          if (!imageSrc || !title || !description || !link) return;
+          onAdd({ imageSrc, title, description, link });
+          setImageSrc(''); setTitle(''); setDescription(''); setLink('');
+        }} className="px-4 py-2 rounded-full border border-white/10 text-white bg-white/10 hover:bg-white/15">Add</button>
       </div>
     </div>
   );
+};
+function Certificates() {
+  const isAdmin = useIsAdmin();
+  const [items, setItems] = React.useState<Array<{ id: string; imageSrc: string; title: string; description: string }>>(() => {
+    const saved = localStorage.getItem('certificates');
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [showAdminModal, setShowAdminModal] = React.useState(false);
+
+  React.useEffect(() => {
+    localStorage.setItem('certificates', JSON.stringify(items));
+  }, [items]);
+
+  const handleLongPress = React.useCallback(() => setShowAdminModal(true), []);
+
+  return (
+    <div className="relative z-10 min-h-screen px-6 py-28">
+      <div className="mx-auto max-w-6xl" onPointerDown={(e) => {
+        if (e.pointerType !== 'mouse') return;
+        const t = e.currentTarget as any; t._pressTimer = setTimeout(handleLongPress, 800);
+      }} onPointerUp={(e) => { const t = e.currentTarget as any; if (t._pressTimer) clearTimeout(t._pressTimer); }}>
+        <h3 className="text-3xl font-bold text-white mb-6">Certificates</h3>
+        <div className="grid gap-6">
+          {items.length === 0 && (
+            <p className="text-white/70">No certificates yet. {isAdmin ? 'Long-press anywhere to unlock admin and add items.' : ''}</p>
+          )}
+          {items.map((c) => (
+            <CertificateCard key={c.id} imageSrc={c.imageSrc} title={c.title} description={c.description} />
+          ))}
+        </div>
+
+        {isAdmin && (
+          <CertificatesAdminEditor onAdd={(payload) => setItems((arr) => [{ id: crypto.randomUUID(), ...payload }, ...arr])} />
+        )}
+      </div>
+      <AdminPasswordModal isOpen={showAdminModal} onClose={() => setShowAdminModal(false)} onSuccess={() => {}} />
+    </div>
+  );
 }
+
+interface CertificatesAdminEditorProps {
+  onAdd: (payload: { imageSrc: string; title: string; description: string }) => void;
+}
+const CertificatesAdminEditor: React.FC<CertificatesAdminEditorProps> = ({ onAdd }) => {
+  const [imageSrc, setImageSrc] = React.useState('');
+  const [title, setTitle] = React.useState('');
+  const [description, setDescription] = React.useState('');
+  return (
+    <div className="mt-8 p-4 rounded-2xl border border-white/10 bg-white/5">
+      <h4 className="text-white font-semibold mb-3">Add Certificate (Admin)</h4>
+      <div className="grid md:grid-cols-2 gap-3">
+        <input value={imageSrc} onChange={(e) => setImageSrc(e.target.value)} placeholder="/6.jpg or https://..." className="px-3 py-2 rounded-lg bg-white/10 text-white outline-none" />
+        <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Title" className="px-3 py-2 rounded-lg bg-white/10 text-white outline-none" />
+        <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Description" className="px-3 py-2 rounded-lg bg-white/10 text-white outline-none md:col-span-2" />
+      </div>
+      <div className="mt-3">
+        <button onClick={() => {
+          if (!imageSrc || !title || !description) return;
+          onAdd({ imageSrc, title, description });
+          setImageSrc(''); setTitle(''); setDescription('');
+        }} className="px-4 py-2 rounded-full border border-white/10 text-white bg-white/10 hover:bg-white/15">Add</button>
+      </div>
+    </div>
+  );
+};
 function About() {
   return (
     <div className="relative z-10 min-h-screen px-6 py-28">
-      <div className="mx-auto max-w-6xl">
-        <h3 className="text-3xl font-bold text-white mb-4">About</h3>
-        <p className="text-white/70">About section coming soon.</p>
+      <div className="mx-auto max-w-6xl space-y-8">
+        <h3 className="text-3xl font-bold text-white">About</h3>
+        <div className="rounded-2xl overflow-hidden border border-white/10 bg-white/5">
+          <img src="/1.jpg" alt="About 1" className="w-full h-72 object-cover" />
+          <div className="p-6">
+            <p className="text-white/80 leading-relaxed">
+              I am a highly skilled and experienced software engineer specialized in full-stack web development. I build modern, responsive, and performant applications, focusing on clean architecture, scalability, and user-centric design. I excel at transforming ideas into real products with high quality standards, delivering maintainable code and robust solutions for complex business needs.
+            </p>
+          </div>
+        </div>
+        <div className="rounded-2xl overflow-hidden border border-white/10 bg-white/5">
+          <img src="/6.jpg" alt="About 6" className="w-full h-72 object-cover" />
+          <div className="p-6">
+            <p className="text-white/80 leading-relaxed">Graduated from Nile University.</p>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -116,7 +247,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/works" element={<Works />} />
-        <Route path="/skills" element={<Skills />} />
+        <Route path="/skills" element={<Certificates />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/login" element={<Login />} />
