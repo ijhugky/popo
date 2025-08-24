@@ -12,7 +12,7 @@ interface NavItem {
 const baseItems: NavItem[] = [
   { label: 'HOME', to: '/' },
   { label: 'OUR WORKS', to: '/works' },
-  { label: 'SKILLS', to: '/skills' },
+  { label: 'CERTIFICATES', to: '/certificates' },
   { label: 'ABOUT', to: '/about' },
   { label: 'CONTACT', to: '/contact' },
   { label: 'LOGIN', to: '/login' },
