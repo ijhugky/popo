@@ -196,8 +196,11 @@ function About() {
       <div className="mx-auto max-w-6xl space-y-8">
         <h3 className="text-3xl font-bold text-white">About</h3>
         <div className="rounded-2xl overflow-hidden border border-white/10 bg-white/5">
-          <div className="w-full h-64 md:h-72 flex items-center justify-center bg-black/20">
-            <img src="/1.jpg" alt="About 1" className="max-h-full max-w-full object-contain" />
+          <div className="relative rounded-xl p-[2px] bg-gradient-to-r from-green-400/30 via-pink-400/30 to-blue-500/30">
+            <div className="w-full h-64 md:h-72 flex items-center justify-center rounded-[0.65rem] bg-black/30">
+              <img src="/1.jpg" alt="About 1" className="max-h-full max-w-full object-contain" />
+            </div>
+            <span className="pointer-events-none absolute -inset-2 rounded-2xl blur-2xl opacity-40 bg-gradient-to-r from-green-400/20 via-pink-400/20 to-blue-500/20" />
           </div>
           <div className="p-6">
             <p className="text-white/80 leading-relaxed">
@@ -206,8 +209,11 @@ function About() {
           </div>
         </div>
         <div className="rounded-2xl overflow-hidden border border-white/10 bg-white/5">
-          <div className="w-full h-64 md:h-72 flex items-center justify-center bg-black/20">
-            <img src="/6.jpg" alt="About 6" className="max-h-full max-w-full object-contain" />
+          <div className="relative rounded-xl p-[2px] bg-gradient-to-r from-blue-400/30 via-pink-400/30 to-green-500/30">
+            <div className="w-full h-64 md:h-72 flex items-center justify-center rounded-[0.65rem] bg-black/30">
+              <img src="/6.jpg" alt="About 6" className="max-h-full max-w-full object-contain" />
+            </div>
+            <span className="pointer-events-none absolute -inset-2 rounded-2xl blur-2xl opacity-40 bg-gradient-to-r from-blue-400/20 via-pink-400/20 to-green-500/20" />
           </div>
           <div className="p-6">
             <p className="text-white/80 leading-relaxed">Graduated from Nile University.</p>

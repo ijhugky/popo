@@ -16,8 +16,11 @@ const WorkCard: React.FC<WorkCardProps> = ({ imageSrc, title, description, link,
       <div className="relative grid md:grid-cols-2 gap-0">
         <div className="relative">
           <div className="absolute inset-0 rounded-2xl border border-white/10 pointer-events-none" />
-          <div className="w-full h-56 md:h-64 flex items-center justify-center bg-black/20">
-            <img src={imageSrc} alt={title} className="max-h-full max-w-full object-contain" />
+          <div className="relative rounded-xl p-[2px] bg-gradient-to-r from-green-400/30 via-pink-400/30 to-blue-500/30 group-hover:from-green-400/50 group-hover:to-blue-500/50 transition">
+            <div className="w-full h-56 md:h-64 flex items-center justify-center rounded-[0.65rem] bg-black/30 group-hover:bg-black/20 transition">
+              <img src={imageSrc} alt={title} className="max-h-full max-w-full object-contain transition-transform duration-500 ease-out group-hover:scale-[1.03]" />
+            </div>
+            <span className="pointer-events-none absolute -inset-2 rounded-2xl blur-2xl opacity-0 group-hover:opacity-60 transition-opacity bg-gradient-to-r from-green-400/20 via-pink-400/20 to-blue-500/20" />
           </div>
           <div className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/10" />
         </div>
