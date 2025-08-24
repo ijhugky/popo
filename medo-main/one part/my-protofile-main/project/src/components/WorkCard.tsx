@@ -16,7 +16,9 @@ const WorkCard: React.FC<WorkCardProps> = ({ imageSrc, title, description, link,
       <div className="relative grid md:grid-cols-2 gap-0">
         <div className="relative">
           <div className="absolute inset-0 rounded-2xl border border-white/10 pointer-events-none" />
-          <img src={imageSrc} alt={title} className="w-full h-60 md:h-full object-cover" />
+          <div className="w-full h-56 md:h-64 flex items-center justify-center bg-black/20">
+            <img src={imageSrc} alt={title} className="max-h-full max-w-full object-contain" />
+          </div>
           <div className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/10" />
         </div>
         <div className="p-6 flex flex-col gap-4">

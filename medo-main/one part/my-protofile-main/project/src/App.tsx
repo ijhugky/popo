@@ -196,7 +196,9 @@ function About() {
       <div className="mx-auto max-w-6xl space-y-8">
         <h3 className="text-3xl font-bold text-white">About</h3>
         <div className="rounded-2xl overflow-hidden border border-white/10 bg-white/5">
-          <img src="/1.jpg" alt="About 1" className="w-full h-72 object-cover" />
+          <div className="w-full h-64 md:h-72 flex items-center justify-center bg-black/20">
+            <img src="/1.jpg" alt="About 1" className="max-h-full max-w-full object-contain" />
+          </div>
           <div className="p-6">
             <p className="text-white/80 leading-relaxed">
               I am a highly skilled and experienced software engineer specialized in full-stack web development. I build modern, responsive, and performant applications, focusing on clean architecture, scalability, and user-centric design. I excel at transforming ideas into real products with high quality standards, delivering maintainable code and robust solutions for complex business needs.
@@ -204,7 +206,9 @@ function About() {
           </div>
         </div>
         <div className="rounded-2xl overflow-hidden border border-white/10 bg-white/5">
-          <img src="/6.jpg" alt="About 6" className="w-full h-72 object-cover" />
+          <div className="w-full h-64 md:h-72 flex items-center justify-center bg-black/20">
+            <img src="/6.jpg" alt="About 6" className="max-h-full max-w-full object-contain" />
+          </div>
           <div className="p-6">
             <p className="text-white/80 leading-relaxed">Graduated from Nile University.</p>
           </div>
