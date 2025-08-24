@@ -59,17 +59,62 @@ function Home() {
 
 function Works() {
   const isAdmin = useIsAdmin();
-  const [items, setItems] = React.useState<Array<{ id: string; imageSrc: string; title: string; description: string; link?: string }>>(() => {
-    const saved = localStorage.getItem('works');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [items, setItems] = React.useState<Array<{ id: string; imageSrc: string; title: string; description: string; link?: string }>>([]);
   const [showAdminModal, setShowAdminModal] = React.useState(false);
+  const [ghToken, setGhToken] = React.useState<string>(localStorage.getItem('gh_token') || '');
+
+  React.useEffect(() => {
+    // Load published content for everyone
+    fetch('/content.json', { cache: 'no-store' })
+      .then((r) => r.ok ? r.json() : { works: [] })
+      .then((data) => {
+        if (Array.isArray(data?.works)) setItems(data.works);
+      })
+      .catch(() => {
+        const saved = localStorage.getItem('works');
+        if (saved) setItems(JSON.parse(saved));
+      });
+  }, []);
 
   React.useEffect(() => {
     localStorage.setItem('works', JSON.stringify(items));
   }, [items]);
 
   const handleLongPress = React.useCallback(() => setShowAdminModal(true), []);
+
+  const publishWorksToGitHub = async () => {
+    if (!ghToken) {
+      alert('Please set a GitHub token first.');
+      return;
+    }
+    try {
+      const owner = 'ijhugky';
+      const repo = 'popo';
+      const path = 'medo-main/one part/my-protofile-main/project/public/content.json';
+      const apiBase = `https://api.github.com/repos/${owner}/${repo}/contents/` + encodeURIComponent(path).replace(/%2F/g, '/');
+      const getRes = await fetch(apiBase, { headers: { Authorization: `token ${ghToken}` } });
+      const getJson = await getRes.json();
+      let existing = { works: [], certificates: [] } as { works: any[]; certificates: any[] };
+      if (getRes.ok && getJson.content) {
+        const decoded = atob(getJson.content);
+        existing = JSON.parse(decoded);
+      }
+      const updated = { ...existing, works: items };
+      const contentB64 = btoa(JSON.stringify(updated, null, 2));
+      const putRes = await fetch(apiBase, {
+        method: 'PUT',
+        headers: { Authorization: `token ${ghToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: 'chore(content): update works', content: contentB64, sha: getJson.sha })
+      });
+      if (!putRes.ok) {
+        const err = await putRes.text();
+        throw new Error(err);
+      }
+      alert('Published works. Netlify will rebuild automatically.');
+    } catch (e: any) {
+      alert('Failed to publish: ' + (e?.message || 'Unknown error'));
+    }
+  };
 
   return (
     <div className="relative z-10 min-h-screen px-6 py-28">
@@ -83,19 +128,25 @@ function Works() {
       }}>
         <h3 className="text-3xl font-bold text-white mb-6">Our Works</h3>
         <div className="grid gap-6">
-          {!isAdmin && (
-            <p className="text-white/70">This section is visible to admin only.</p>
+          {items.length === 0 && (
+            <p className="text-white/70">No works yet.</p>
           )}
-          {isAdmin && items.length === 0 && (
-            <p className="text-white/70">No works yet. Long-press anywhere to unlock admin and add items.</p>
-          )}
-          {isAdmin && items.map((w) => (
+          {items.map((w) => (
             <WorkCard key={w.id} imageSrc={w.imageSrc} title={w.title} description={w.description} link={w.link} showViewButton />
           ))}
         </div>
 
         {isAdmin && (
-          <WorksAdminEditor onAdd={(payload) => setItems((arr) => [{ id: crypto.randomUUID(), ...payload }, ...arr])} />
+          <>
+            <WorksAdminEditor onAdd={(payload) => setItems((arr) => [{ id: crypto.randomUUID(), ...payload }, ...arr])} />
+            <div className="mt-4 p-4 rounded-2xl border border-white/10 bg-white/5 flex flex-col md:flex-row gap-3 items-start md:items-end">
+              <div className="flex-1 w-full">
+                <label className="block text-white/80 text-sm mb-1">GitHub Token (repo scope)</label>
+                <input type="password" value={ghToken} onChange={(e) => { setGhToken(e.target.value); localStorage.setItem('gh_token', e.target.value); }} className="w-full px-3 py-2 rounded-lg bg-white/10 text-white outline-none" placeholder="ghp_..." />
+              </div>
+              <button onClick={publishWorksToGitHub} className="px-4 py-2 rounded-full border border-white/10 text-white bg-gradient-to-r from-green-500/30 to-blue-500/30">Publish Works</button>
+            </div>
+          </>
         )}
       </div>
       <AdminPasswordModal isOpen={showAdminModal} onClose={() => setShowAdminModal(false)} onSuccess={() => {}} />
@@ -147,17 +198,55 @@ const WorksAdminEditor: React.FC<WorksAdminEditorProps> = ({ onAdd }) => {
 };
 function Certificates() {
   const isAdmin = useIsAdmin();
-  const [items, setItems] = React.useState<Array<{ id: string; imageSrc: string; title: string; description: string }>>(() => {
-    const saved = localStorage.getItem('certificates');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [items, setItems] = React.useState<Array<{ id: string; imageSrc: string; title: string; description: string }>>([]);
   const [showAdminModal, setShowAdminModal] = React.useState(false);
+  const [ghToken, setGhToken] = React.useState<string>(localStorage.getItem('gh_token') || '');
+
+  React.useEffect(() => {
+    fetch('/content.json', { cache: 'no-store' })
+      .then((r) => r.ok ? r.json() : { certificates: [] })
+      .then((data) => {
+        if (Array.isArray(data?.certificates)) setItems(data.certificates);
+      })
+      .catch(() => {
+        const saved = localStorage.getItem('certificates');
+        if (saved) setItems(JSON.parse(saved));
+      });
+  }, []);
 
   React.useEffect(() => {
     localStorage.setItem('certificates', JSON.stringify(items));
   }, [items]);
 
   const handleLongPress = React.useCallback(() => setShowAdminModal(true), []);
+
+  const publishCertificatesToGitHub = async () => {
+    if (!ghToken) { alert('Please set a GitHub token first.'); return; }
+    try {
+      const owner = 'ijhugky';
+      const repo = 'popo';
+      const path = 'medo-main/one part/my-protofile-main/project/public/content.json';
+      const apiBase = `https://api.github.com/repos/${owner}/${repo}/contents/` + encodeURIComponent(path).replace(/%2F/g, '/');
+      const getRes = await fetch(apiBase, { headers: { Authorization: `token ${ghToken}` } });
+      const getJson = await getRes.json();
+      let existing = { works: [], certificates: [] } as { works: any[]; certificates: any[] };
+      if (getRes.ok && getJson.content) {
+        const decoded = atob(getJson.content);
+        existing = JSON.parse(decoded);
+      }
+      const updated = { ...existing, certificates: items };
+      const contentB64 = btoa(JSON.stringify(updated, null, 2));
+      const putRes = await fetch(apiBase, {
+        method: 'PUT',
+        headers: { Authorization: `token ${ghToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: 'chore(content): update certificates', content: contentB64, sha: getJson.sha })
+      });
+      if (!putRes.ok) throw new Error(await putRes.text());
+      alert('Published certificates. Netlify will rebuild automatically.');
+    } catch (e: any) {
+      alert('Failed to publish: ' + (e?.message || 'Unknown error'));
+    }
+  };
 
   return (
     <div className="relative z-10 min-h-screen px-6 py-28">
@@ -167,19 +256,25 @@ function Certificates() {
       }} onPointerUp={(e) => { const t = e.currentTarget as any; if (t._pressTimer) clearTimeout(t._pressTimer); }}>
         <h3 className="text-3xl font-bold text-white mb-6">Certificates</h3>
         <div className="grid gap-6">
-          {!isAdmin && (
-            <p className="text-white/70">This section is visible to admin only.</p>
+          {items.length === 0 && (
+            <p className="text-white/70">No certificates yet.</p>
           )}
-          {isAdmin && items.length === 0 && (
-            <p className="text-white/70">No certificates yet. Long-press anywhere to unlock admin and add items.</p>
-          )}
-          {isAdmin && items.map((c) => (
+          {items.map((c) => (
             <CertificateCard key={c.id} imageSrc={c.imageSrc} title={c.title} description={c.description} />
           ))}
         </div>
 
         {isAdmin && (
-          <CertificatesAdminEditor onAdd={(payload) => setItems((arr) => [{ id: crypto.randomUUID(), ...payload }, ...arr])} />
+          <>
+            <CertificatesAdminEditor onAdd={(payload) => setItems((arr) => [{ id: crypto.randomUUID(), ...payload }, ...arr])} />
+            <div className="mt-4 p-4 rounded-2xl border border-white/10 bg-white/5 flex flex-col md:flex-row gap-3 items-start md:items-end">
+              <div className="flex-1 w-full">
+                <label className="block text-white/80 text-sm mb-1">GitHub Token (repo scope)</label>
+                <input type="password" value={ghToken} onChange={(e) => { setGhToken(e.target.value); localStorage.setItem('gh_token', e.target.value); }} className="w-full px-3 py-2 rounded-lg bg-white/10 text-white outline-none" placeholder="ghp_..." />
+              </div>
+              <button onClick={publishCertificatesToGitHub} className="px-4 py-2 rounded-full border border-white/10 text-white bg-gradient-to-r from-green-500/30 to-blue-500/30">Publish Certificates</button>
+            </div>
+          </>
         )}
       </div>
       <AdminPasswordModal isOpen={showAdminModal} onClose={() => setShowAdminModal(false)} onSuccess={() => {}} />
