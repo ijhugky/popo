@@ -9,6 +9,7 @@ import ProfileImage from './components/ProfileImage';
 import TypingText from './components/TypingText';
 import LoadingScreen from './components/LoadingScreen';
 import Navbar from './components/Navbar';
+import AdminExitButton from './components/AdminExitButton';
 import WorkCard from './components/WorkCard';
 import CertificateCard from './components/CertificateCard';
 import useIsAdmin from './hooks/useIsAdmin';
@@ -82,10 +83,13 @@ function Works() {
       }}>
         <h3 className="text-3xl font-bold text-white mb-6">Our Works</h3>
         <div className="grid gap-6">
-          {items.length === 0 && (
-            <p className="text-white/70">No works yet. {isAdmin ? 'Long-press anywhere to unlock admin and add items.' : ''}</p>
+          {!isAdmin && (
+            <p className="text-white/70">This section is visible to admin only.</p>
           )}
-          {items.map((w) => (
+          {isAdmin && items.length === 0 && (
+            <p className="text-white/70">No works yet. Long-press anywhere to unlock admin and add items.</p>
+          )}
+          {isAdmin && items.map((w) => (
             <WorkCard key={w.id} imageSrc={w.imageSrc} title={w.title} description={w.description} link={w.link} showViewButton />
           ))}
         </div>
@@ -148,10 +152,13 @@ function Certificates() {
       }} onPointerUp={(e) => { const t = e.currentTarget as any; if (t._pressTimer) clearTimeout(t._pressTimer); }}>
         <h3 className="text-3xl font-bold text-white mb-6">Certificates</h3>
         <div className="grid gap-6">
-          {items.length === 0 && (
-            <p className="text-white/70">No certificates yet. {isAdmin ? 'Long-press anywhere to unlock admin and add items.' : ''}</p>
+          {!isAdmin && (
+            <p className="text-white/70">This section is visible to admin only.</p>
           )}
-          {items.map((c) => (
+          {isAdmin && items.length === 0 && (
+            <p className="text-white/70">No certificates yet. Long-press anywhere to unlock admin and add items.</p>
+          )}
+          {isAdmin && items.map((c) => (
             <CertificateCard key={c.id} imageSrc={c.imageSrc} title={c.title} description={c.description} />
           ))}
         </div>
@@ -254,6 +261,7 @@ function App() {
     <div className="min-h-screen bg-gray-900 relative overflow-hidden">
       <Navbar />
       <AnimatedBackground />
+      <AdminExitButton />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/works" element={<Works />} />
