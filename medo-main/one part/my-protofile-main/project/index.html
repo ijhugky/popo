@@ -25,6 +25,15 @@
     <meta name="twitter:image" content="https://your-domain.example/og-image.jpg" />
   </head>
   <body>
+    <!-- Netlify Forms detection (hidden) -->
+    <form name="contact" data-netlify="true" data-netlify-honeypot="bot-field" hidden>
+      <input type="text" name="first" />
+      <input type="text" name="middle" />
+      <input type="text" name="last" />
+      <input type="tel" name="phone" />
+      <textarea name="desc"></textarea>
+    </form>
+
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

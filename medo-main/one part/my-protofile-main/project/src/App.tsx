@@ -442,13 +442,19 @@ function Contact() {
     const { name, value } = e.target;
     setForm((f) => ({ ...f, [name]: value }));
   };
-  const onSubmit = (e: React.FormEvent) => {
+  const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Placeholder submit: يمكنك ربطه بخدمة بريد لاحقًا
-    console.log('Contact form:', form);
-    setSent(true);
-    setTimeout(() => setSent(false), 3000);
-    setForm({ first: '', middle: '', last: '', phone: '', desc: '' });
+    try {
+      const formData = new FormData();
+      formData.append('form-name', 'contact');
+      Object.entries(form).forEach(([k, v]) => formData.append(k, v));
+      await fetch('/', { method: 'POST', body: formData });
+      setSent(true);
+      setTimeout(() => setSent(false), 3000);
+      setForm({ first: '', middle: '', last: '', phone: '', desc: '' });
+    } catch {
+      alert('Failed to send. Please try again.');
+    }
   };
   return (
     <div className="relative z-10 min-h-screen px-6 py-28">
@@ -456,7 +462,8 @@ function Contact() {
         <GradientText className="text-3xl md:text-4xl font-extrabold tracking-tight mb-6">Let's Talk</GradientText>
         <div className="relative rounded-2xl p-[2px] bg-gradient-to-r from-green-400/30 via-blue-500/30 to-pink-500/30">
           <div className="rounded-2xl bg-black/40 backdrop-blur-md border border-white/10 p-6 md:p-8">
-            <form onSubmit={onSubmit} className="grid gap-4">
+            <form onSubmit={onSubmit} name="contact" data-netlify="true" data-netlify-honeypot="bot-field" className="grid gap-4">
+              <input type="hidden" name="form-name" value="contact" />
               <div className="grid md:grid-cols-3 gap-3">
                 <div className="group">
                   <label className="block text-xs text-white/70 mb-1">First name</label>
