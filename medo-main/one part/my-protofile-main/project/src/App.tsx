@@ -14,6 +14,9 @@ import WorkCard from './components/WorkCard';
 import CertificateCard from './components/CertificateCard';
 import useIsAdmin from './hooks/useIsAdmin';
 import AdminPasswordModal from './components/AdminPasswordModal';
+import CertificatesPage from './pages/Certificates';
+
+
 
 function Home() {
   const handleContactEmail = () => {
@@ -540,7 +543,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/works" element={<Works />} />
         <Route path="/skills" element={<Certificates />} />
-        <Route path="/certificates" element={<Certificates />} />
+        <Route path="/certificates" element={<CertificatesPage />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/talk" element={<Contact />} />
